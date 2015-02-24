@@ -1,0 +1,26 @@
+#task_container svg {
+	border-width: 3px;
+	border-radius: 10px;
+	border-style: solid;
+	border-color: black;
+}
+#system_container {
+	display: none;
+	svg {
+		border-width: 3px;
+		border-radius: 10px;
+		border-style: solid;
+		border-color: black;
+	}
+}
+.connection { pointer-events: none; }
+.connection-wrap { pointer-events: none; }
+.labels { pointer-events: none; }
+
+#dialog-form {
+	background: blue;
+}
+
+.title_manager {
+	padding: 0px auto;
+}
