@@ -1,12 +1,66 @@
-#task_container svg {
-	border-width: 3px;
-	border-radius: 10px;
-	border-style: solid;
-	border-color: black;
+/*body {
+	background-color: #E1E1E8;
+}*/
+
+
+text.topName{
+transform: translate(25px,5px);
+-ms-transform: translate(25px,5px); /* IE 9 */
+-webkit-transform: translate(25px,5px); /* Safari and Chrome */
+-o-transform: translate(25px,5px); /* Opera */
+-moz-transform: translate(25px,5px); /* Firefox */
+}
+text.topValue{
+transform: translate(25px,30px);
+-ms-transform: translate(25px,30px); /* IE 9 */
+-webkit-transform: translate(25px,30px); /* Safari and Chrome */
+-o-transform: translate(25px,30px); /* Opera */
+-moz-transform: translate(25px,30px); /* Firefox */
+}
+
+#dialog_bar {
+	display: none;
+	position: fixed;
+	width: 200px;
+	height: 150px;
+	border: 2px solid black;
+	border-radius: 20px;
+	background-color: white;
+	input {
+		margin: 10px 0px 0px 10px;
+	}
+	button {
+		float: right;
+		margin: 10px 10px 0px 0px;
+	}
+	p {
+		font-size: 18px;
+		margin-top: 25px;
+		text-align: center;
+	}
+}
+
+#task_container {
+	overflow: hidden;
+	svg {
+		background-image: url(/assets/grid.png);
+		background-size: 230px 230px;
+		width: 100%;
+		height: 100%;
+		border-width: 3px;
+		border-radius: 10px;
+		border-style: solid;
+		border-color: black;
+	}
 }
 #system_container {
+	overflow: hidden;
 	display: none;
 	svg {
+		background-image: url(/assets/grid.png);
+		background-size: 230px 230px;
+		width: 100%;
+		height: 100%;
 		border-width: 3px;
 		border-radius: 10px;
 		border-style: solid;
@@ -17,10 +71,41 @@
 .connection-wrap { pointer-events: none; }
 .labels { pointer-events: none; }
 
-#dialog-form {
-	background: blue;
+html, body {
+    		height: 100%;
+    		margin: 0;
+    	}
+
+#background_message {
+	display: none;
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+	border: 2px solid black;
+	background: rgba(0, 0, 0, 0.3);
 }
 
-.title_manager {
-	padding: 0px auto;
+#message_bar {
+	display: none;
+	position: fixed;
+	border: 3px solid black;
+	border-radius: 40px;
+	top: 50%;
+	left: 50%;
+	margin-top: -50px;
+	margin-left: -250px;
+	width: 500px;
+	height: 100px;
+	background: rgba(255, 255, 255, 1);
+	h3 {
+		text-align: center;
+	}
+}
+
+#close_message_bar {
+	position: inherit;
+	right: 50%;
+	margin-right: -32px;
 }

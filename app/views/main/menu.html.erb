@@ -3,29 +3,75 @@
   <head>
   </head>
   <body>
-  	<button id="hide_show">Change Graph Manager</button>
+<div id="task_container">
+  <!-- Start -->
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href="/">PZKS</a>
+	    </div>
 
-  	<div id="task_container">
-  	<h1 class="title_manager">Task Manager</h1>
-  		<div style="float: left; margin-top: 20px;">
-		  	<input type="checkbox" id="editModeTask">Edit Mode on/off</input></br>
-		  	<button id="add_tops_connect">Add Connection</button></br>
-		  	<button id="clear_task_paper">Clear</button></br>
-		  	<button id="save_to_file_task">Save</button></br>
-		  	<button id="load_from_file_task">Load</button><input type="file" id="file_task"/></br>
-		  	<button id="test_task">Test</button></br>
-	  	</div>
-  	</div>
-  	<div id="system_container">
-  	<h1 class="title_manager">System Manager</h1>
-  		 <div style="float: left; margin-top: 20px;">
-		  	<input type="checkbox" id="editModeSystem">Edit Mode on/off</input></br>
-		  	<button id="add_processors_connect">Add Connection</button></br>
-		  	<button id="clear_sys_paper">Clear</button></br>
-		  	<button id="save_to_file_sys">Save</button></br>
-		  	<button id="load_from_file_sys">Load</button><input type="file" id="file_sys"/></br>
-		  	<button id="test_sys">Test</button></br>
-	  	</div>
-  	</div>
+	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      <ul class="nav navbar-nav">
+	        <button id="hide_show" type="button" class="btn btn-default navbar-btn">Change Graph Manager</button></br>
+	        <input type="checkbox" id="editModeTask">Edit Mode on/off</input>
+	      </ul>
+	      	<h3 class="navbar-text">Task Graph Manager</h3> 
+
+	      <ul class="nav navbar-nav navbar-right">
+	      	<button id="clear_task_paper" type="button" class="btn btn-default navbar-btn">Clear</button>
+	      	<button id="save_to_file_task" type="button" class="btn btn-default navbar-btn">Save</button>
+	      	<button id="load_from_file_task" type="button" class="btn btn-default navbar-btn">Drow</button>
+	      	<button id="test_task" type="button" class="btn btn-default navbar-btn">Test Graph</button>
+					<input type="file" id="file_task">
+	      </ul>
+	    </div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+	<!-- END -->
+	</div>
+
+<div id="system_container">
+<!-- Start -->
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href="/">PZKS</a>
+	    </div>
+
+	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      <ul class="nav navbar-nav">
+	        <button id="hide_show2" type="button" class="btn btn-default navbar-btn">Change Graph Manager</button></br>
+	        <input type="checkbox" id="editModeSystem">Edit Mode on/off</input>
+	      </ul>
+	      	<h3 class="navbar-text">System Graph Manager</h3> 
+
+	      <ul class="nav navbar-nav navbar-right">
+	      	<button id="clear_sys_paper" type="button" class="btn btn-default navbar-btn">Clear</button>
+	      	<button id="save_to_file_sys" type="button" class="btn btn-default navbar-btn">Save</button>
+	      	<button id="load_from_file_sys" type="button" class="btn btn-default navbar-btn">Drow</button>
+	      	<button id="test_sys" type="button" class="btn btn-default navbar-btn">Test Graph</button>
+					<input type="file" id="file_sys">
+	      </ul>
+	    </div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
+	<!-- END -->
+	</div>
+
+	<div id="dialog_bar">
+	<p></p>
+	<input type="text" id="dialog_val" value="" />
+	<button id="accept_dialog" type="button" class="btn btn-default navbar-btn">Confirm</button>
+	</div>
+	<div id="background_message">
+		<div id="message_bar">
+		<h3></h3>
+		<button id="close_message_bar" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		</div>
+
+	</div>
   </body> 
 </html>

@@ -2,18 +2,35 @@ var arrayOfTopsTask = []; // [0] Original id of top, [1] Top ID (my id, get cell
 var arrayOfLinksTask = []; // [0] Original id of link, [1] Top Sourse id_top [2] Top Target id_top [3] Link Weight
 var iTopsTask = 0;
 
+joint.shapes.basic.newCircle = joint.shapes.basic.Generic.extend({
+
+    markup: '<g class="rotatable"><g class="scalable"><circle/></g><text class="topName"/><text class="topValue"/></g>',
+    
+    defaults: joint.util.deepSupplement({
+
+        type: 'basic.newCircle',
+        size: { width: 60, height: 60 },
+        attrs: {
+            'circle': { fill: '#FFFFFF', stroke: 'black', r: 30, transform: 'translate(30, 30)' },
+            'text': { 'font-size': 14, text: '', 'text-anchor': 'middle', 'ref-x': .5, 'ref-y': .5, ref: 'circle', 'y-alignment': 'middle', fill: 'black', 'font-family': 'Arial, helvetica, sans-serif' }
+        }
+    }, joint.shapes.basic.Generic.prototype.defaults)
+});
+
 
 // Add new top in TaskGraph
 taskPaper.on('blank:pointerdblclick', function(e, x, y) {
 	if (editModeTask) {
 	  mouseX = x - 25
 	  mouseY = y - 25
-	  var top = (new joint.shapes.basic.Circle({
+	  var top = (new joint.shapes.basic.newCircle({
 		    position: { x: mouseX, y: mouseY },
 		    size: { width: 50, height: 50 },
 		    id_top: iTopsTask,
-		    attrs: { circle: { fill: 'green', class: 'taskTop', 'stroke-width': 2 }, text: { text: '1', fill: 'black'}}
+		    attrs: { circle: { fill: 'white', class: 'taskTop', 'stroke-width': 2 }}
 		})).addTo(taskGraph);
+		top.attr('.topValue/text', "1");
+		top.attr('.topName/text', iTopsTask.toString());
 		arrayOfTopsTask.push([top.id, top.attributes.id_top, "1"]); // Write to ARRAY OF TOPS
 		iTopsTask++;
   }
@@ -65,54 +82,96 @@ taskPaper.on('blank:pointerclick', function(){
 });
 
 // Add link between select tops
-$('#add_tops_connect').click(function(){
-	if (selectELements.length == 2) {
-	    src = selectELements[0]
-	    trg = selectELements[1]
+key('q', function(){
+	if (editModeTask) {
+		if (selectELements.length == 2) {
+		    src = selectELements[0]
+		    trg = selectELements[1]
 
-			var link = (new joint.dia.Link({
-		    source: { id: src.id },
-		    target: { id: trg.id },
-		    attrs: {
-		    	'.connection': { 'stroke-width': 2 },
-		      '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' }
-		    },
-		    labels: [
-		        { position: .5, attrs: { text: { text: '1' } } }
-		    ]
-		})).addTo(taskGraph);
-			arrayOfLinksTask.push([link.id, src.attributes.id_top, trg.attributes.id_top, "1"]) // Write to Array of Links
+				var link = (new joint.dia.Link({
+			    source: { id: src.id },
+			    target: { id: trg.id },
+			    attrs: {
+			    	'.connection': { 'stroke-width': 2 },
+			      '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' }
+			    },
+			    labels: [
+			        { position: .5, attrs: { text: { text: '1' } } }
+			    ]
+			})).addTo(taskGraph);
+				arrayOfLinksTask.push([link.id, src.attributes.id_top, trg.attributes.id_top, "1"]) // Write to Array of Links
+		}
 	}
 });
+
+//Dialog bar
+
+function dialogBar(mess, value, posX, posY){
+	$("#dialog_bar p").html(mess);
+	$('#dialog_bar').css('top',posY+'px');
+	$('#dialog_bar').css('left',posX+'px');
+	$('#dialog_val').val(value);
+	$('#dialog_bar').show('fast');
+	$('#dialog_bar').css('z-index', '99');
+}
+var dialogCell;
+$('#accept_dialog').click(function(){
+	value = $('#dialog_val').val();
+	if ((value % 1) === 0) {
+		$('#dialog_bar').hide('fast');
+		$('#dialog_bar').css('z-index', '-99');
+		if (dialogTopTask) {
+			dialogCell.attr('.topValue/text', value)
+			for (i=0; i < arrayOfTopsTask.length; i++){
+				if (dialogCell.id == arrayOfTopsTask[i][0]){
+					arrayOfTopsTask[i][2] = value 	// Change VAL in Array
+				}
+			}
+			dialogTopTask = false;
+		}
+		else if (dialogLinkTask) {
+			dialogCell.label(0,{
+				attrs: {
+					text: {text: value}
+				}
+			})
+			for (i=0; i < arrayOfLinksTask.length; i++) {
+				if (dialogCell.id == arrayOfLinksTask[i][0]){
+					arrayOfLinksTask[i][3] = value;
+				}
+			}
+			dialogLinkTask = false;
+		}		
+	}
+	else {
+		$('#dialog_bar').css('border-color', 'red');
+	}
+
+
+})
 
 //Change top value
 taskPaper.on('cell:pointerdblclick', function(cellView, e){
 	if (editModeTask == false){
-		value = prompt('Change Value', "")
-		cellView.model.attr({
-			text: { text: value }
-		});
-		for (i=0; i < arrayOfTopsTask.length; i++){
-			if (cellView.model.id == arrayOfTopsTask[i][0]){
-				arrayOfTopsTask[i][2] = value 	// Change VAL in Array
-			}
-		}
+		dialogTopTask = true;
+		message = "Input top weight value"
+		dialogCell = cellView.model;
+		value = cellView.model.attr('.topValue/text')
+		x = e.clientX
+		y = e.clientY
+		dialogBar(message, value, x, y);
 	}
 });
 
 // Change link value
 taskPaper.on('link:options', function(e,link){
-	value = prompt('Change Value', "")
-	link.model.label(0,{
-		attrs: {
-			text: {text: value}
-		}
-	})
-	for (i=0; i < arrayOfLinksTask.length; i++) {
-		if (link.model.id == arrayOfLinksTask[i][0]){
-			arrayOfLinksTask[i][3] = value;
-		}
-	}
+	dialogCell = link.model
+	dialogLinkTask = true;
+	message = "Input link weight value"
+	value = link.model.attributes.labels[0].attrs.text.text;
+	x = e.clientX
+	y = e.clientY
+	dialogBar(message, value, x, y);	
 });
 
 // Remove top

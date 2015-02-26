@@ -3,7 +3,7 @@ var taskGraph = new joint.dia.Graph;
 var taskPaper = new joint.dia.Paper({
     el: $('#task_container'),
     width: 800,
-    height: 550,
+    height: 500,
     model: taskGraph,
     gridSize: 1
 });
@@ -13,38 +13,45 @@ var systemGraph = new joint.dia.Graph;
 var systemPaper = new joint.dia.Paper({
     el: $('#system_container'),
     width: 800,
-    height: 550,
+    height: 500,
     model: systemGraph,
-    gridSize: 1
+    gridSize: 30
 });
 
+// $(window).resize(function(event) {
+//   var new_h = $(window).height();
+//   var new_w = $(window).width();
+//   taskPaper.setDimensions(new_w, new_h)
+//   systemPaper.setDimensions(new_w, new_h)
+// });
 
 $("#hide_show").click(function(){
 var $div1 = $('#task_container')
 var $div2 = $('#system_container')
-  if ($div1.is(':visible')) {
-  	$div1.hide();
-  	$div2.show();
-  }
-  else if ($div2.is(':visible')) {
-  	$div2.hide();
-  	$div1.show();
-  }
+$div1.hide();
+$div2.show();
+});
+
+$("#hide_show2").click(function(){
+var $div1 = $('#task_container')
+var $div2 = $('#system_container')
+$div2.hide();
+$div1.show();
 });
 
 // Attributes
 attrs = {
 	topDefault: {
-	    circle: { fill: 'green' }
+	    circle: { fill: 'white' }
 	},
 	topSelect: {
-		circle: {fill: 'red'}
+		circle: {fill: '#e1e1e8'}
 	},
   sysElmDefault: {
-      rect: { fill: 'yellow' }
+      rect: { fill: 'white' }
   },
   sysElmSelect: {
-      rect: {fill: 'red'}
+      rect: {fill: '#e1e1e8'}
   }
 }
 
@@ -91,3 +98,18 @@ function handleFileSelect(event) {
 }
 
 options = {disconnectLinks : false}
+dialogLinkTask = false;
+dialogTopTask = false;
+
+function resultMessage(message) {
+  $('#background_message').show();
+  $('#message_bar').show('fast');
+  $('#message_bar h3').html(message);
+  $('#background_message').css('z-index','100');
+}
+
+$('#close_message_bar').click(function(){
+  $('#background_message').hide('fast');
+  $('#message_bar').hide('fast');
+  $('#background_message').css('z-index','-100');
+})

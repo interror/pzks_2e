@@ -21,7 +21,7 @@ class TaskGraph
 	def run_program(schema)
 		create_links(schema)
 		# create_matrix
-		p cyclic?(schema)
+		#p cyclic?(schema)
 		
 	end
 
@@ -37,7 +37,7 @@ class TaskGraph
 		end
 	end
 
-private
+
 	
 	def create_links(schema)
 		schema.each do |link|

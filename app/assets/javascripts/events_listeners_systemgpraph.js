@@ -22,7 +22,7 @@ systemPaper.on('blank:pointerdblclick', function(e, x, y) {
         position: { x: mouseX, y: mouseY },
         size: { width: 60, height: 60 },
         id_top: iTopsSys,
-        attrs: { rect: { fill: 'yellow', class: 'sysTop', 'stroke-width': 2 } }
+        attrs: { rect: { fill: 'white', class: 'sysTop', rx: 10, ry: 10, 'stroke-width': 2}, text: {text: iTopsSys, fill: 'black'} }
     });
     systemGraph.addCell(top);
     iTopsSys++;
@@ -57,7 +57,8 @@ systemPaper.on('blank:pointerclick', function(){
 });
 
 // Add link between select system elements
-$('#add_processors_connect').click(function(){
+key('q', function(){
+  if (editModeSys){
     if (selectSysELements.length == 2) {
         src = selectSysELements[0]
         trg = selectSysELements[1]
@@ -72,6 +73,7 @@ $('#add_processors_connect').click(function(){
     systemGraph.addCell(link);
     arrayOfLinksSys.push([link.id, src.attributes.id_top, trg.attributes.id_top]) //Write to Array of links
     }
+  }
 });
 
 // Remove top

@@ -12,9 +12,10 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require bootstrap-sprockets
 //= require turbolinks
-//= require jquery-ui
 //= require joint.js
 //= require FileSaver.min.js
+//= require keymaster.js
 //= require main.js
 //= require_tree .
