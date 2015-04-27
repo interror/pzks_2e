@@ -38,7 +38,7 @@ taskPaper.on('blank:pointerdblclick', function(e, x, y) {
 
 // Active edit mode for Task Graph
 
-var editModeTask;
+
 
 $('#editModeTask').on('change', function(evt) {
 	editModeTask = $(evt.target).is(':checked');
@@ -100,6 +100,9 @@ key('q', function(){
 			    ]
 			})).addTo(taskGraph);
 				arrayOfLinksTask.push([link.id, src.attributes.id_top, trg.attributes.id_top, "1"]) // Write to Array of Links
+		selectELements[0].attr(attrs.topDefault);
+		selectELements[1].attr(attrs.topDefault);
+		selectELements = []
 		}
 	}
 });
@@ -192,6 +195,7 @@ taskPaper.on('cell:pointerdblclick', function(cellView){
 $('#clear_task_paper').click(function(){
 	taskGraph.clear()
 	arrayOfTopsTask = []
+	arrayOfLinksTask = []
 	iTopsTask = 0
 });
 
@@ -209,8 +213,7 @@ $('#save_to_file_task').click(function(){
 document.getElementById('file_task').addEventListener('change', handleFileSelect, false);
 //Load on paper JSON object
 $('#load_from_file_task').click(function(){
-	jsonObjectTask = JSON.parse(textTask);
-	taskGraph.fromJSON(jsonObjectTask);
+	$("#file_task").trigger( "click" );
 });
 
 
@@ -235,4 +238,191 @@ taskGraph.on('remove', function(cellView){
 			arrayOfLinksTask.splice(delete_index,1);
 		}
 	}
+});
+
+$('#sort_task_graph').click(function(){
+	$('#background_sort').show();
+  $('#sort_bar').show('fast');
+})
+$('#close_sort_bar').click(function(){
+  $('#background_sort').hide('fast');
+  $('#sort_bar').hide('fast');
+});
+
+function addResultMessageToSortBar(message){
+	$("#sort_bar p").html(message);
+}
+
+$('#sort1').click(function(){
+	$.ajax({
+	  type: "POST",
+	  url: "/sort1",
+	  data: { sort1_data: [JSON.stringify(arrayOfTopsTask),JSON.stringify(arrayOfLinksTask)]}
+	});	
+});
+
+$('#sort2').click(function(){
+	$.ajax({
+	  type: "POST",
+	  url: "/sort2",
+	  data: { sort2_data: [JSON.stringify(arrayOfTopsTask),JSON.stringify(arrayOfLinksTask)]}
+	});	
+});
+
+$('#sort3').click(function(){
+	$.ajax({
+	  type: "POST",
+	  url: "/sort3",
+	  data: { sort3_data: [JSON.stringify(arrayOfTopsTask),JSON.stringify(arrayOfLinksTask)]}
+	});	
+});
+
+$("#graph_generator").click(function(){
+	$('#background_generator').show();
+  $('#generator_bar').show('fast');
+});
+
+$("#close_graph_generator").click(function(){
+  $('#background_generator').hide('fast');
+  $('#generator_bar').hide('fast');
+});
+
+$("#generate").click(function(){
+	minWeight = $("#generator_bar input[name='minWeight']").val()
+	maxWeight = $("#generator_bar input[name='maxWeight']").val()
+	num = $("#generator_bar input[name='num']").val()
+	correlation = $("#generator_bar input[name='correlation']").val()
+	if ($.isNumeric(minWeight) && $.isNumeric(maxWeight) && $.isNumeric(num) && $.isNumeric(correlation)){
+		$("#generator_bar").css('border-color','black');
+		$.ajax({
+		  type: "POST",
+		  url: "/generate",
+		  data: { generator_data: [minWeight, maxWeight, num, correlation]}
+		});
+	}
+	else{
+		$("#generator_bar").css('border-color','red');
+	}
+});
+
+function drowGenerateGraph(levelsM, nodesM, wnodesM, linksM, wlinksM, maxTop){
+	
+	nodes = nodesM.split(",") // Nodes
+	for (i=0; i < nodes.length; i++){
+		nodes[i] = parseInt(nodes[i])
+	}
+	
+	levels = levelsM.split("|") // LEVELS
+	levels = _.without(levels, "");
+	for (i = 0; i < levels.length ; i++) {
+		levels[i] = levels[i].split(",")
+		for (j=0; j<levels[i].length; j++){
+			levels[i][j] = parseInt(levels[i][j])
+		}
+	};
+	weight_nodes = wnodesM.split(",") // Weight for nodes
+	links = linksM.split("|") // LINKS
+	links = _.without(links, "");
+	for (i=0; i<links.length; i++) {
+		links[i] = links[i].split(",")
+		for (j=0; j<links[i].length; j++){
+			links[i][j] = parseInt(links[i][j])
+		}
+	}
+	weight_links = wlinksM.split(",") // Weights LINKS
+
+	iTopsTask = parseInt(maxTop);
+
+	// console.log(nodes)
+	// console.log(weight_nodes)
+	// console.log(links)
+	// console.log(weight_links)
+
+	if (nodes.length <= 10){
+		posX = 20
+		posY = 20
+		arrayTopsWithId = []
+
+		for (i=0; i<levels.length; i++){
+			for (j=0; j<levels[i].length; j++){
+				indexTop = levels[i][j]
+				indexVal = nodes.indexOf(indexTop)
+				value = weight_nodes[indexVal]
+
+			  var top = (new joint.shapes.basic.newCircle({
+				    position: { x: posX, y: posY },
+				    size: { width: 50, height: 50 },
+				    id_top: indexTop,
+				    attrs: { circle: { fill: 'white', class: 'taskTop', 'stroke-width': 2 }}
+				})).addTo(taskGraph);
+				top.attr('.topValue/text', value);
+				top.attr('.topName/text', indexTop.toString());
+				arrayOfTopsTask.push([top.id, top.attributes.id_top, value]); // Write to ARRAY OF TOPS
+				posX = posX + 60 + 50
+			}
+			posX = 20
+			posY = posY + 50 + 50
+		}
+
+		for (i=0; i<links.length;i++){
+			
+			for (j=0; j<arrayOfTopsTask.length; j++){
+				var cell_1;
+				var cell_2;
+				if (links[i][0] == arrayOfTopsTask[j][1]){
+					cell_1 = arrayOfTopsTask[j][0]
+				}
+				if (links[i][1] == arrayOfTopsTask[j][1]){
+					cell_2 = arrayOfTopsTask[j][0]
+				}
+			}
+
+				src = taskGraph.getCell(cell_1)
+			  trg = taskGraph.getCell(cell_2)
+
+					var link = (new joint.dia.Link({
+				    source: { id: src.id },
+				    target: { id: trg.id },
+				    attrs: {
+				    	'.connection': { 'stroke-width': 2 },
+				      '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' }
+				    },
+				    labels: [
+				        { position: .5, attrs: { text: { text: weight_links[i] } } }
+				    ]
+					})).addTo(taskGraph);
+					arrayOfLinksTask.push([link.id, src.attributes.id_top, trg.attributes.id_top, weight_links[i]])
+
+		}
+	}
+	else {
+		for (i=0; i<nodes.length; i++){
+			arrayOfTopsTask.push(["none", nodes[i], weight_nodes[i]]);
+		}
+		for (i=0; i<links.length; i++){
+			arrayOfLinksTask.push(["none", links[i][0], links[i][1], weight_links[i]])
+		}
+	}
+}
+
+$("#gant").click(function(){
+	coef = 1
+	phys_links = $("#phys_links").val()
+  console.log(phys_links)	
+	console.log(duplex)
+	sort_var = $( "input:radio[name=sort]:checked" ).val();
+  console.log(sort_var)
+  tops = JSON.stringify(arrayOfTopsTask)
+  links = JSON.stringify(arrayOfLinksTask)
+  procs = JSON.stringify(arrayOfTopsSys)
+  connections =  JSON.stringify(arrayOfLinksSys)
+  console.log(arrayOfTopsTask)
+  console.log(arrayOfLinksTask)
+  console.log(arrayOfTopsSys)
+  console.log(arrayOfLinksSys)
+  $.ajax({
+		  type: "POST",
+		  url: "/gant",
+		  data: { gant_data: [duplex, phys_links, sort_var, coef, tops, links, procs, connections]}
+		});
 });

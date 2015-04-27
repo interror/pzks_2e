@@ -2,7 +2,7 @@ var arrayOfTopsSys = [] // [0] Original id of top, [1] Top ID (my id, get cell.a
 var arrayOfLinksSys = [] // [0] Original id of link, [1] Top Sourse id_top [2] Top Target id_top
 var iTopsSys = 0;
 // Change edit mode for system graph
-var editModeSys;
+
 $('#editModeSystem').on('change', function(evt) {
   editModeSys = $(evt.target).is(':checked');
   if (editModeSys) {
@@ -72,6 +72,9 @@ key('q', function(){
         });
     systemGraph.addCell(link);
     arrayOfLinksSys.push([link.id, src.attributes.id_top, trg.attributes.id_top]) //Write to Array of links
+    selectSysELements[0].attr(attrs.sysElmDefault);
+    selectSysELements[1].attr(attrs.sysElmDefault);
+    selectSysELements = []
     }
   }
 });
@@ -94,6 +97,7 @@ systemPaper.on('cell:pointerdblclick', function(cellView, e){
 $('#clear_sys_paper').click(function(){
   systemGraph.clear()
   arrayOfTopsSys = []
+  arrayOfLinksSys = []
   iTopsSys = 0
 });
 
@@ -113,8 +117,7 @@ $('#save_to_file_sys').click(function(){
 document.getElementById('file_sys').addEventListener('change', handleFileSelect, false);
 //Load on paper JSON object
 $('#load_from_file_sys').click(function(){
-  jsonObjectSys = JSON.parse(textSys);
-  systemGraph.fromJSON(jsonObjectSys);
+  $("#file_sys").trigger( "click" );
 });
 
 // Remove link event for System
@@ -140,3 +143,8 @@ $('#test_sys').click(function(){
     data: { sys_data: [JSON.stringify(arrayOfTopsSys),JSON.stringify(arrayOfLinksSys)]}
   }); 
 })
+
+var duplex = false;
+$('#duplex').on('change', function(evt) {
+   duplex = $(evt.target).is(':checked');
+});

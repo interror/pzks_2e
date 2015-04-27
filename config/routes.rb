@@ -2,6 +2,11 @@ Rails.application.routes.draw do
 
   get '/' => 'main#menu'
   post '/' => 'main#tests'
+  post '/sort1' => 'main#sort1'
+  post '/sort2' => 'main#sort2'
+  post '/sort3' => 'main#sort3'
+  post '/generate' => 'main#generate_graph'
+  post '/gant' => 'main#gant'
   
 
   # The priority is based upon order of creation: first created -> highest priority.

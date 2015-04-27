@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+
   </head>
   <body>
 <div id="task_container">
@@ -20,11 +21,17 @@
 	      	<h3 class="navbar-text">Task Graph Manager</h3> 
 
 	      <ul class="nav navbar-nav navbar-right">
+	      	<button id="gant" type="button" class="btn btn-default navbar-btn">Gant</button>
+	      	<input type="radio" checked="checked" name="sort" value="sort1"> 1-st sort
+	      	<input type="radio" name="sort" value="sort2"> 2-nd sort
+	      	<input type="radio" name="sort" value="sort3"> 3-rd sort
+	      	<button id="graph_generator" type="button" class="btn btn-default navbar-btn">Generate</button>
+	      	<button id="sort_task_graph" type="button" class="btn btn-default navbar-btn">Sort</button>
+	      	<button id="test_task" type="button" class="btn btn-default navbar-btn">Test Graph</button>
 	      	<button id="clear_task_paper" type="button" class="btn btn-default navbar-btn">Clear</button>
 	      	<button id="save_to_file_task" type="button" class="btn btn-default navbar-btn">Save</button>
-	      	<button id="load_from_file_task" type="button" class="btn btn-default navbar-btn">Drow</button>
-	      	<button id="test_task" type="button" class="btn btn-default navbar-btn">Test Graph</button>
-					<input type="file" id="file_task">
+	      	<button id="load_from_file_task" type="button" class="btn btn-default navbar-btn">Open</button>
+					<input type="file" id="file_task" style="display: none;">
 	      </ul>
 	    </div><!-- /.navbar-collapse -->
 	  </div><!-- /.container-fluid -->
@@ -49,11 +56,13 @@
 	      	<h3 class="navbar-text">System Graph Manager</h3> 
 
 	      <ul class="nav navbar-nav navbar-right">
+	      	<input type="checkbox" id="duplex">Duplex on/off</input>
+	      	<input type="number" id="phys_links" name="points" min="0" max="100" step="1" value="2">
+	      	<button id="test_sys" type="button" class="btn btn-default navbar-btn">Test Graph</button>
 	      	<button id="clear_sys_paper" type="button" class="btn btn-default navbar-btn">Clear</button>
 	      	<button id="save_to_file_sys" type="button" class="btn btn-default navbar-btn">Save</button>
-	      	<button id="load_from_file_sys" type="button" class="btn btn-default navbar-btn">Drow</button>
-	      	<button id="test_sys" type="button" class="btn btn-default navbar-btn">Test Graph</button>
-					<input type="file" id="file_sys">
+	      	<button id="load_from_file_sys" type="button" class="btn btn-default navbar-btn">Open</button>
+					<input type="file" id="file_sys" style="display: none;">
 	      </ul>
 	    </div><!-- /.navbar-collapse -->
 	  </div><!-- /.container-fluid -->
@@ -68,10 +77,38 @@
 	</div>
 	<div id="background_message">
 		<div id="message_bar">
+		<%= image_tag("icon_ok.png", id: "image_ok") %>
+		<%= image_tag("icon_error.png", id: "image_error") %>
 		<h3></h3>
 		<button id="close_message_bar" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 		</div>
-
+	</div>
+	<div id="background_sort">
+		<div id="sort_bar">
+		<div class="sort_btns" align="center" style="margin-top: 20px;">
+			<button id="sort1" type="button" class="btn btn-default" data-dismiss="modal">Sort 1</button>
+			<button id="sort2" type="button" class="btn btn-default" data-dismiss="modal">Sort 2</button>
+			<button id="sort3" type="button" class="btn btn-default" data-dismiss="modal">Sort 3</button>
+		</div>
+		<p></p>
+		<button id="close_sort_bar" type="button" class="btn btn-default" data-dismiss="modal">Close</button></br>
+		</div>
+	</div>
+	<div id="background_generator">
+		<div id="generator_bar">
+		<form>
+			<p>
+	  		Minimal Weight <input class="input_gen_val" type="text" name="minWeight" value="4">
+	  		Maximal Weight <input class="input_gen_val" type="text" name="maxWeight" value="7">
+	  		Number of Nodes <input class="input_gen_val" type="text" name="num" value="10">
+	  		Correlation <input class="input_gen_val" type="text" name="correlation" value="0.7">
+	  	</p>
+		</form>
+		<p class="generator_output_n"></p>
+		<p class="generator_output_l"></p>
+		<button id="generate" type="button" class="btn btn-default" data-dismiss="modal">Generate</button></br>
+		<button id="close_graph_generator" type="button" class="btn btn-default" data-dismiss="modal">Close</button></br>
+		</div>
 	</div>
   </body> 
 </html>
