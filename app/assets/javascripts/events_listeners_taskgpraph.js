@@ -406,7 +406,7 @@ function drowGenerateGraph(levelsM, nodesM, wnodesM, linksM, wlinksM, maxTop){
 }
 
 $("#gant").click(function(){
-	coef = 1
+	coef = $("#coefficient").val()
 	phys_links = $("#phys_links").val()
  	// console.log(phys_links)	
 	// console.log(duplex)

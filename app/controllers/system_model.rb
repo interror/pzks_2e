@@ -108,10 +108,17 @@ private
 		end
 	end
 
+	def count_task_working_time(task_graph)
+		task_graph.graph.each do |top|
+			top.weight = (top.weight / @coeficient).ceil
+			top.work_counter = (top.work_counter / @coeficient).ceil
+		end
+	end
 
 	def working_model(task_graph)	
 		n = @model.length #Count of processors in system model
-		@coef = @coeficient * 1 # Coeficient of Processor work
+		@coef = 1 # Coeficient of Processor work
+		count_task_working_time(task_graph) # Change work weight of task using diving on coeff
 		ready_array = []
 		task_graph.order_list.each{|elm| ready_array << elm if (elm.status_is_ready? && ready_array.length < n) }
 		for i in 0..ready_array.length-1
@@ -132,6 +139,7 @@ private
 		@model.each{|prc| @gantDiagram[prc.id] = [] }
 		@hash_of_transfering = {}
 		initialize_transfering_diagram
+
 		## START CYCLE
 		while !work_array.empty?
 			takts += 1
@@ -178,7 +186,7 @@ private
 					work_array[i].work_counter -= 1
 					#@gantDiagram[work_array[i].get_connect.get.id+n][takts-1] = "#{work_array[i].send_connect.send.id}(#{work_array[i].link.to.task.top})"
 					arr = @hash_of_transfering["#{work_array[i].get_connect.get.id}-#{work_array[i].send_connect.send.id}"]
-					arr[takts-1] = "#{work_array[i].link.to.task.top}"
+					arr[takts-1] = "#{work_array[i].link.from_name}-#{work_array[i].link.to.task.top}"
 					if work_array[i].work_counter <= 0
 						work_array[i].link.add = false
 
@@ -259,6 +267,7 @@ private
 			#puts "==="
 		end
 		## END CYCLE
+
 		#p takts
 		#@model.each{|elm| puts elm.stay_time }
 
@@ -298,7 +307,7 @@ private
 		elm = prc.task.in_links
 		for i in 0..elm.length-1
 			@history_cache.each do |key, val|
-				array_links << [key,prc.id, prc.task.in_links_weight[i]] if val.include?(elm[i].top)
+				array_links << [key,prc.id, prc.task.in_links_weight[i], elm[i].top] if val.include?(elm[i].top)
 			end
 		end
 
@@ -309,7 +318,7 @@ private
 			end
 		end
 		result_array = []
-		array_links.each {|lnk| result_array << Link.new(lnk[0], lnk[1], lnk[2]) }
+		array_links.each {|lnk| result_array << Link.new(lnk[0], lnk[1], lnk[2], lnk[3]) }
 		return result_array
 	end
 
