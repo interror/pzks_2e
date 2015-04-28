@@ -425,7 +425,7 @@ $("#gant").click(function(){
 		  url: "/gant",
 		  data: { gant_data: [duplex, phys_links, sort_var, coef, tops, links, procs, connections]},
 		  success: function (data) {
-        drowGantDiagram(data);
-        }
+        drowGantDiagramK(data);
+      }
 		});
 });
