@@ -58,6 +58,26 @@ class SystemModel
 		working_model(task_graph)
 	end
 
+	def construct_gant_diagram
+		pos = @gantDiagram.max_by{|k,v| v.length}.last.length
+		processors_array = []
+		@gantDiagram.each do |k,v| 
+			v[0] = k
+			v[pos] = nil
+			processors_array << v
+		end
+		array = (0..pos).to_a
+		processors_array.insert(0, array)
+		transfer_array = []
+		@hash_of_transfering.each do |key, val|
+			val[0] = key
+			val[pos] = nil
+			transfer_array << val
+		end
+		transfer_array.insert(0, array)
+		return [processors_array, transfer_array]
+	end
+
 private
 
 	def create_links(schema)
@@ -103,11 +123,13 @@ private
 		@model.each {|prc| prc.stay_time += 1 if prc.task == nil}
 		ready_array = []
 		ready_for_send = []
-		#show_work(work_array)  # SHOW
-		#puts "==="
+		# show_work(work_array)  # SHOW
+		# puts "==="
 
 		takts = 0
-		@gantDiagram = Array.new(n) { |i| i = Array.new }
+		# @gantDiagram = Array.new(n) { |i| i = Array.new }
+		@gantDiagram = {}
+		@model.each{|prc| @gantDiagram[prc.id] = [] }
 		@hash_of_transfering = {}
 		initialize_transfering_diagram
 		## START CYCLE
@@ -119,7 +141,10 @@ private
 				if work_array[i].class == ProcessorElement
 					if work_array[i].task.status != :wait_data
 						work_array[i].task.work_counter -= @coef 						#Sub coef of work in processor
-						@gantDiagram[work_array[i].id][takts] = "#{work_array[i].task.top}"
+						# @gantDiagram[work_array[i].id][takts] = "#{work_array[i].task.top}"
+						buffer = @gantDiagram[work_array[i].id]
+						buffer[takts] = "#{work_array[i].task.top}"
+						@gantDiagram[work_array[i].id] = buffer
 					elsif work_array[i].task.status == :wait_data && !work_array[i].wait_data
 						send = initialize_sending(work_array[i])
 						send.each do |elm|
@@ -174,7 +199,10 @@ private
 								work_array[i].link.to.active_forwards = []
 								work_array[i].link.to.wait_data = false
 								work_array[i].link.to.task.work_counter -= @coef 						#Sub coef of work in processor
-								@gantDiagram[work_array[i].link.to.id][takts] = "#{work_array[i].link.to.task.top}"
+								#@gantDiagram[work_array[i].link.to.id][takts] = "#{work_array[i].link.to.task.top}"
+								buffer = @gantDiagram[work_array[i].link.to.id]
+								buffer[takts] = "#{work_array[i].link.to.task.top}"
+								@gantDiagram[work_array[i].link.to.id] = buffer
 							end
 							work_array[i].link.final == false
 						end
@@ -228,43 +256,14 @@ private
 			#show_work(work_array) #SHOW
 			# puts "Stay time"
 			# @model.each{|elm| puts elm.stay_time }
-			# puts "==="
+			#puts "==="
 		end
 		## END CYCLE
 		#p takts
 		#@model.each{|elm| puts elm.stay_time }
-		show_diagram_gant
+
 	end
 
-	def show_diagram_gant
-		pos = @gantDiagram.max_by{|n| n.length }.length
-		@gantDiagram.each {|n| n[pos] = nil }
-		array = (0..pos).to_a
-		@gantDiagram.insert(0, array)
-		for j in 0..@gantDiagram[0].length-1
-			for k in 0..@gantDiagram.length-1
-				if k == 0
-				print "#{@gantDiagram[k][j]}\t"	
-				elsif @gantDiagram[k][j] != nil
-				print "[#{@gantDiagram[k][j]}]\t"
-				else
-				print "[ ]\t"
-				end
-			end
-			print "\n"
-		end
-		print " \t"
-		@hash_of_transfering.each do |key, val|
-			print "#{key}\t"
-			val[pos] = nil
-		end
-		print "\n"
-		for i in 0..pos
-			print "#{i}\t"
-			@hash_of_transfering.each_value{ |val| print "[#{val[i]}]\t"}
-			print "\n"
-		end
-	end
 
 	def initialize_transfering_diagram
 		@model.each do |prc_from|
@@ -331,7 +330,10 @@ private
 				lnk.to.active_forwards = []
 				lnk.to.wait_data = false
 				lnk.to.task.work_counter -= @coef 						#Sub coef of work in processor
-				@gantDiagram[lnk.to.id][takts] = "#{lnk.to.task.top}"
+				#@gantDiagram[lnk.to.id][takts] = "#{lnk.to.task.top}"
+				buffer = @gantDiagram[lnk.to.id]
+				buffer[takts] = "#{lnk.to.task.top}"
+				@gantDiagram[lnk.to.id] = buffer
 			end
 		elsif !lnk.path.empty?
 			if @connection_type == :halfduplex
@@ -424,22 +426,33 @@ end
 
 
 
-arr = [0, 1, 2, 3, 4, 5, 6]
-arr_of_links = [[0, 1], [1, 2], [2, 5], [4, 5], [4, 3], [0, 3], [1, 4], [6, 5]]
-# arr = [0,1]
-# arr_of_links = [[0,1]]
+# arr = [0, 1, 2, 3, 4, 5, 6]
+# arr_of_links = [[0, 1], [1, 2], [2, 5], [4, 5], [4, 3], [0, 3], [1, 4], [6, 5]]
+# # arr = [0,1]
+# # arr_of_links = [[0,1]]
 
-arr_tops = [[0, "5"], [1, "4"], [2, "3"], [3, "6"], [4, "2"],[5,"1"],[6, "2"],[7,"4"]]
-arr_tops_links = [[0, 2, "2"], [0, 1, "3"], [4, 2, "2"], [1, 3, "5"], [2, 3, "2"],[5, 6, "3"],[3,7,"3"]]
-sort_arr = [7,2,3,0,4,1,5,6]
+# arr_tops = [[0, "5"], [1, "4"], [2, "3"], [3, "6"], [4, "2"],[5,"1"],[6, "2"],[7,"4"]]
+# arr_tops_links = [[0, 2, "2"], [0, 1, "3"], [4, 2, "2"], [1, 3, "5"], [2, 3, "2"],[5, 6, "3"],[3,7,"3"]]
+# sort_arr = [7,2,3,0,4,1,5,6]
 
-taskGraph = TaskGraphModel.new(arr_tops,arr_tops_links,sort_arr)
-taskGraph.order_graph
-#taskGraph.show
+# :fullduplex
+# 2
+# 1
+# arr_tops = [[0, "2"], [1, "3"], [2, "2"], [3, "5"], [4, "7"]]
+# arr_tops_links = [[0, 2, "2"], [1, 2, "3"], [1, 3, "6"], [2, 4, "2"], [3, 4, "1"]]
+# arr = [0, 2, 3, 4, 5]
+# arr_of_links = [[0, 4], [2, 4], [3, 4], [4, 5]]
+# sort_arr = [2, 1, 3, 4, 0]
 
-systemModel = SystemModel.new(arr,arr_of_links,1,2,:fullduplex)
-#systemModel.show
+
+# taskGraph = TaskGraphModel.new(arr_tops,arr_tops_links,sort_arr)
+# taskGraph.order_graph
+# #taskGraph.show
+
+# systemModel = SystemModel.new(arr,arr_of_links,1,2,:fullduplex)
+# #systemModel.show
 
 
-systemModel.start(taskGraph)
-#taskGraph.show
+# systemModel.start(taskGraph)
+# #taskGraph.show
+# systemModel.construct_gant_diagram

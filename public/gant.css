@@ -1,0 +1,25 @@
+.processors td { 
+	border: 2px solid black; 
+	width: 20px; 
+	table-layout:fixed;
+	text-align: center;
+}
+
+.processors > tbody > tr:first-child > td {
+    background: black;
+    color: white;
+    font-size: 16px;
+}
+
+.routes td {
+	border: 2px solid black; 
+	width: 30px; 
+	table-layout:fixed;
+	text-align: center;	
+}
+
+.routes > tbody > tr:first-child > td {
+    background: black;
+    color: white;
+    font-size: 16px;
+}

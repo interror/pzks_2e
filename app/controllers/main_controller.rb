@@ -46,7 +46,7 @@ class MainController < ApplicationController
 		p array_of_processors = arrays[2].flatten
 		p array_of_connects = arrays[3]
 		p sort_array
-		
+
 		# Create model of task graph
 		taskGraph = TaskGraphModel.new(array_of_tops, array_of_links, sort_array)
 		taskGraph.order_graph
@@ -54,8 +54,13 @@ class MainController < ApplicationController
 		# Create system model
 		systemModel = SystemModel.new(array_of_processors, array_of_connects, coef, phys_links, duplex)
 		systemModel.start(taskGraph)
+		p out = systemModel.construct_gant_diagram
+		#out = [[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27], [0, "1", "1", "1", "1", "1", "1", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], [1, "0", "0", "0", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "4", "4", "4", nil], [2, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "3", "3", "3", "3", "3", "3", "3", nil, nil, nil, nil, nil, nil, nil, nil], [3, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "2", "2", "2", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil]], [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27], ["0-3", nil, nil, nil, nil, nil, nil, "3", "3", "3", "2", "2", "2", "2", "2", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["0-1", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["1-3", nil, nil, nil, nil, nil, nil, "2", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["1-2", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["1-0", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["2-3", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["2-1", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "4", "4", "4", "4", nil, nil, nil, nil], ["3-0", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil], ["3-1", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "4", "4", "4", "4", nil, nil, nil, nil], ["3-2", nil, nil, nil, nil, nil, nil, nil, nil, nil, "3", "3", "3", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil]]]
 
-		render nothing: true
+
+		respond_to do |format|
+				format.json {render json: out }
+    end
 	end
 
 

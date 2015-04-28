@@ -408,21 +408,24 @@ function drowGenerateGraph(levelsM, nodesM, wnodesM, linksM, wlinksM, maxTop){
 $("#gant").click(function(){
 	coef = 1
 	phys_links = $("#phys_links").val()
-  console.log(phys_links)	
-	console.log(duplex)
+ 	// console.log(phys_links)	
+	// console.log(duplex)
 	sort_var = $( "input:radio[name=sort]:checked" ).val();
-  console.log(sort_var)
+  // console.log(sort_var)
   tops = JSON.stringify(arrayOfTopsTask)
   links = JSON.stringify(arrayOfLinksTask)
   procs = JSON.stringify(arrayOfTopsSys)
   connections =  JSON.stringify(arrayOfLinksSys)
-  console.log(arrayOfTopsTask)
-  console.log(arrayOfLinksTask)
-  console.log(arrayOfTopsSys)
-  console.log(arrayOfLinksSys)
+  // console.log(arrayOfTopsTask)
+  // console.log(arrayOfLinksTask)
+  // console.log(arrayOfTopsSys)
+  // console.log(arrayOfLinksSys)
   $.ajax({
 		  type: "POST",
 		  url: "/gant",
-		  data: { gant_data: [duplex, phys_links, sort_var, coef, tops, links, procs, connections]}
+		  data: { gant_data: [duplex, phys_links, sort_var, coef, tops, links, procs, connections]},
+		  success: function (data) {
+        drowGantDiagram(data);
+        }
 		});
 });
