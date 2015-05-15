@@ -1,5 +1,6 @@
 require 'task_model.rb'
 require 'controller_model.rb'
+require 'analyze_model.rb'
 
 class ProcessorElement
 
@@ -9,7 +10,6 @@ class ProcessorElement
 		@id = top
 		@links = []
 		@controller = ControllerModel.new(id, connection, physical_links) # Add controller
-		#@work = false # true / false
 		@wait_data = false
 		@stay_time = 0
 		@task = nil
@@ -27,7 +27,6 @@ class ProcessorElement
 		end
 		return false
 	end
-
 end
 
 
@@ -39,6 +38,7 @@ class SystemModel
 		@coeficient = coef_of_work_for_all_procs
 		@history_cache = {} # Processor ID : Task Top
 		@model = []
+		@physical_links = physical_links
 		@connection_type = connection
 		tops_lst.each { |i| @model << ProcessorElement.new(i, physical_links, connection) }
 		create_links(schema)
@@ -56,6 +56,10 @@ class SystemModel
 
 	def start(task_graph)
 		working_model(task_graph)
+	end
+
+	def start2(task_graph)
+		working_model2(task_graph)
 	end
 
 	def construct_gant_diagram
@@ -186,7 +190,7 @@ private
 					work_array[i].work_counter -= 1
 					#@gantDiagram[work_array[i].get_connect.get.id+n][takts-1] = "#{work_array[i].send_connect.send.id}(#{work_array[i].link.to.task.top})"
 					arr = @hash_of_transfering["#{work_array[i].get_connect.get.id}-#{work_array[i].send_connect.send.id}"]
-					arr[takts-1] = "#{work_array[i].link.from_name}-#{work_array[i].link.to.task.top}"
+					arr[takts-1] = "#{work_array[i].link.from_name}-#{work_array[i].link.to_name}"
 					if work_array[i].work_counter <= 0
 						work_array[i].link.add = false
 
@@ -244,7 +248,7 @@ private
 			# Add tasks from READY ARRAY to WORK ARRAY
 			for i in 0..ready_array.length-1
 				if any_empty_processor?
-					processor = find_max_stay_processor
+					processor = find_max_stay_processor #find_max_stay_processor
 					processor.task = ready_array[i]
 					processor.stay_time = 0
 					ready_array[i] = nil
@@ -273,7 +277,7 @@ private
 
 	end
 
-
+	
 	def initialize_transfering_diagram
 		@model.each do |prc_from|
 			prc_from.links.each do |prc_to|
@@ -318,7 +322,7 @@ private
 			end
 		end
 		result_array = []
-		array_links.each {|lnk| result_array << Link.new(lnk[0], lnk[1], lnk[2], lnk[3]) }
+		array_links.each {|lnk| result_array << Link.new(lnk[0], lnk[1], lnk[2], lnk[3], prc.task.top) }
 		return result_array
 	end
 
@@ -431,6 +435,348 @@ private
 	return true
 	end
 
+
+# Laba 7
+#============
+	def working_model2(task_graph)	
+		n = @model.length #Count of processors in system model
+		@coef = 1 # Coeficient of Processor work
+		count_task_working_time(task_graph) # Change work weight of task using diving on coeff
+		ready_array = []
+		task_graph.order_list.each{|elm| ready_array << elm if (elm.status_is_ready? && ready_array.length < n) }
+		ready_array.each {|top| print "#{top.top}, " }
+		print "\n"
+
+		sorted_processors_lst = @model.sort{|x,y| y.links.length <=> x.links.length }
+		sorted_processors_lst.each {|prc| print "#{prc.id}, " }
+		print "\n"
+
+
+		for i in 0..ready_array.length-1
+			sorted_processors_lst[i].task = ready_array[i]
+		end
+
+		work_array = []
+		@model.each{|prc| work_array << prc if prc.task != nil}
+		# Stay time counter
+		@model.each {|prc| prc.stay_time += 1 if prc.task == nil}
+		ready_array = []
+		ready_for_send = []
+		# show_work(work_array)  # SHOW
+		# puts "==="
+
+		takts = 0
+		# @gantDiagram = Array.new(n) { |i| i = Array.new }
+		@gantDiagram = {}
+		@model.each{|prc| @gantDiagram[prc.id] = [] }
+		@hash_of_transfering = {}
+		initialize_transfering_diagram
+
+		## START CYCLE
+		while !work_array.empty?
+			takts += 1
+			# Task Counter -1
+			for i in 0..work_array.length-1
+				# Work counter
+				if work_array[i] != nil
+				if work_array[i].class == ProcessorElement
+					if work_array[i].task.status != :wait_data
+						work_array[i].task.work_counter -= @coef 						#Sub coef of work in processor
+						# @gantDiagram[work_array[i].id][takts] = "#{work_array[i].task.top}"
+						buffer = @gantDiagram[work_array[i].id]
+						buffer[takts] = "#{work_array[i].task.top}"
+						@gantDiagram[work_array[i].id] = buffer
+					elsif work_array[i].task.status == :wait_data && !work_array[i].wait_data
+						send = initialize_sending(work_array[i])
+						send.each do |elm|
+							res = []
+							lr = []
+							find_path(elm.from, elm.to, res, lr)
+							min_path = lr.min_by { |i| i.length }
+							elm.path = min_path
+							# elm.path.each{|i| print"#{i.id} "}
+							# print "\n"
+							ready_for_send << elm
+							work_array[i].active_forwards << elm
+							
+						end
+						work_array[i].wait_data = true
+					end
+
+					if work_array[i].task.work_counter <= 0
+						# Write result data to Memory in Proc. Elm
+						work_array[i].memory[work_array[i].task.top] = work_array[i].result
+						# Write in history of model
+						@history_cache[work_array[i].id] << work_array[i].task.top
+						# Task is DONE
+						work_array[i].task.done_status
+						# kill this task
+						work_array[i] = nil
+					end
+				end
+
+				if work_array[i].class == Transfer
+					work_array[i].work_counter -= 1
+					#@gantDiagram[work_array[i].get_connect.get.id+n][takts-1] = "#{work_array[i].send_connect.send.id}(#{work_array[i].link.to.task.top})"
+					arr = @hash_of_transfering["#{work_array[i].get_connect.get.id}-#{work_array[i].send_connect.send.id}"]
+					arr[takts-1] = "#{work_array[i].link.from_name}-#{work_array[i].link.to_name}"
+					if work_array[i].work_counter <= 0
+						work_array[i].link.add = false
+
+						work_array[i].send_connect.send = nil
+						work_array[i].get_connect.get = nil
+
+						if (work_array[i].get_connect.get == nil && work_array[i].get_connect.send == nil)&&(work_array[i].send_connect.send == nil && work_array[i].send_connect.get == nil)
+							work_array[i].get_connect.status = false
+							work_array[i].send_connect.status = false
+						end
+
+						
+						if work_array[i].link.final == true
+							# work_array[i].link.to.task.ready_status
+							work_array[i].link.done = true
+							if work_array[i].link.to.active_forwards_done?
+								work_array[i].link.to.task.ready_status
+								work_array[i].link.to.active_forwards = []
+								work_array[i].link.to.wait_data = false
+								work_array[i].link.to.task.work_counter -= @coef 						#Sub coef of work in processor
+								#@gantDiagram[work_array[i].link.to.id][takts] = "#{work_array[i].link.to.task.top}"
+								buffer = @gantDiagram[work_array[i].link.to.id]
+								buffer[takts] = "#{work_array[i].link.to.task.top}"
+								@gantDiagram[work_array[i].link.to.id] = buffer
+								if work_array[i].link.to.task.work_counter <= 0
+									# Write result data to Memory in Proc. Elm
+									work_array[i].link.to.memory[work_array[i].link.to.task.top] = work_array[i].link.to.result
+									# Write in history of model
+									@history_cache[work_array[i].link.to.id] << work_array[i].link.to.task.top
+									# Task is DONE
+									work_array[i].link.to.task.done_status
+									# kill this task
+									index = work_array.index(work_array[i].link.to)
+									work_array[index] = nil
+								end
+							end
+							work_array[i].link.final == false
+						end
+						work_array[i] = nil
+					end
+				end
+				end
+			end
+
+			# all with done status is NIL
+			@model.each{|prc| prc.task = nil if prc.task != nil && prc.task.status == :done}
+			# Stay time counter
+			@model.each {|prc| prc.stay_time += 1 if prc.task == nil}
+
+			# Create ARRAY for ready tasks
+			task_graph.order_list.each{|elm| ready_array << elm if (elm.all_parent_task_done? && elm.status_is_ready? && elm.weight == elm.work_counter && !include_task?(elm)) }
+			task_graph.order_list.each{|elm| ready_array << elm if elm.status == :wait_data && !include_wait_top?(elm, work_array) }
+
+			# Add connects for counter (WORK ARRAY)
+			for i in 0..ready_for_send.length-1
+				if !ready_for_send[i].path.empty? && !ready_for_send[i].add
+					send(ready_for_send[i], work_array, takts) == false
+				end
+			end
+
+			# Delete nil OBJECTS fro work array
+			work_array.delete(nil)
+
+			
+
+			# Add tasks from READY ARRAY to WORK ARRAY
+			for i in 0..ready_array.length-1
+				if any_empty_processor?
+					processor = find_close_in_processor(ready_array[i])
+					processor.task = ready_array[i]
+					processor.stay_time = 0
+					ready_array[i] = nil
+					work_array << processor
+				end
+			end
+					
+
+
+			#p @history_cache
+			# @model.each do |proc|
+			# 	print "proc_id: #{proc.id}"
+			# 	proc.active_forwards.each {|fwd| print "(#{fwd.from.id}-#{fwd.to.id})" }
+			# 	print "\n"
+			# end
+			ready_array = []
+			#show_work(work_array) #SHOW
+			# puts "Stay time"
+			# @model.each{|elm| puts elm.stay_time }
+			#puts "==="
+		end
+		## END CYCLE
+
+		#p takts
+		#@model.each{|elm| puts elm.stay_time }
+		#show_console_gant(construct_gant_diagram)
+	end
+
+	def find_close_in_processor(task)
+		free_processors = @model.select{|prc| prc.task == nil }
+		hash_of_takts = {}
+
+		free_processors.each do |prc|
+			array_links = []
+			elm = task.in_links
+			for i in 0..elm.length-1
+				@history_cache.each do |key, val|
+					array_links << [key,prc.id, task.in_links_weight[i], elm[i].top] if val.include?(elm[i].top)
+				end
+			end
+			for i in 0..array_links.length-1
+				res = []
+				lr = []
+				from_prc = @model.select{|proc| proc.id == array_links[i][0]}
+				to_prc = @model.select{|proc| proc.id == array_links[i][1]}
+
+				find_path(from_prc[0], to_prc[0], res, lr)
+				min_path = lr.min_by { |i| i.length }
+				path = min_path.map { |e| e.id }
+				array_links[i][3] = path
+			end
+			
+			transfer_array = []
+			array_links.each do |arr|
+				transfer_array << TransferAnalyze.new(arr[0], arr[1], arr[2], arr[3])
+			end
+			hash_of_takts[prc.id] = analyzer_work(transfer_array)
+		end
+		p "For - #{task.top}"
+		p hash_of_takts
+		res = hash_of_takts.min_by{|kay,value| value}
+		result = @model.find{|prc| prc.id == res[0] }
+		return result
+	end
+
+	def analyzer_work(transfer_array)
+		processors = []
+		@model.each{|prc| processors << [prc.id, @physical_links] }
+
+		work_array = []
+		transfer_array.each do |transfer|
+			if transfer.path[0] != nil
+				if no_such_send(transfer.path[0], work_array) && empty_connects(transfer.path[0],processors, work_array)
+					work_array << transfer.path[0]
+				end	
+			end
+		end
+
+		takts = 0
+
+		while !work_array.empty?
+			takts += 1
+			for i in 0..work_array.length-1
+				work_array[i].work -= 1
+
+				if work_array[i].work <= 0
+					delete_send_path(work_array[i],transfer_array)
+					make_free_connects(work_array[i], processors, work_array)
+					work_array[i] = nil
+
+					transfer_array.each do |transfer|
+						if transfer.path[0] != nil
+							if no_such_send(transfer.path[0], work_array) && empty_connects(transfer.path[0],processors, work_array)
+								work_array << transfer.path[0]
+							end	
+						end
+					end
+				end
+			end
+			work_array.delete(nil)
+		end
+		return takts
+	end
+
+	def delete_send_path(send, transfer_array)
+		transfer_array.each do |trn|
+			for i in 0..trn.path.length-1
+				trn.delete_path if trn.path[i] == send
+			end
+		end
+	end
+
+	def no_such_send(send, work_array)
+		if !work_array.empty? && send != nil
+			for i in 0..work_array.length-1
+				if work_array[i] != nil
+					return false if work_array[i].from == send.from && work_array[i].to == send.to
+					if @connection == :halfduplex
+						return false if work_array[i].from == send.to && work_array[i].to == send.from
+					end
+				end
+			end
+		end
+		return true
+	end
+
+	def empty_connects(send,processors, work_array)
+		condition1 = false
+		condition2 = false
+		pos1 = 0
+		pos2 = 0
+		for i in 0..processors.length-1
+			if processors[i][0] == send.from
+				condition1 = true if processors[i][1] > 0
+				pos1 = i if processors[i][1] > 0
+			end
+			if processors[i][0] == send.to
+				condition2 = true if processors[i][1] > 0
+				pos2 = i if processors[i][1] > 0
+			end
+		end
+		if @connection_type == :halfduplex
+			if condition1 && condition2
+				processors[pos1][1] -= 1
+				processors[pos2][1] -= 1
+				return true
+			end
+		elsif @connection_type == :fullduplex && fulduplex_connection_search(send, work_array)
+			return true
+		elsif @connection_type == :fullduplex
+			if condition1 && condition2
+				processors[pos1][1] -= 1
+				processors[pos2][1] -= 1
+				return true
+			end
+		end
+		return false
+	end
+
+	def fulduplex_connection_search(send, work_array)
+		if !work_array.empty? && send != nil
+			for i in 0..work_array.length-1
+				if work_array[i] != nil
+						return true if work_array[i].from == send.to && work_array[i].to == send.from
+				end
+			end
+		end
+		return false
+	end
+
+	def make_free_connects(send, processors, work_array)
+		if @connection_type == :halfduplex
+			for i in 0..processors.length-1
+				processors[i][1] += 1 if send.from == processors[i][0]
+				processors[i][1] += 1 if send.to == processors[i][0]
+			end
+		elsif @connection_type == :fullduplex && fulduplex_connection_search(send, work_array)
+			return true
+		elsif @connection_type == :fullduplex
+			for i in 0..processors.length-1
+				processors[i][1] += 1 if send.from == processors[i][0]
+				processors[i][1] += 1 if send.to == processors[i][0]
+			end
+		end
+	end
+
+
+
 end
 
 
@@ -444,9 +790,7 @@ end
 # arr_tops_links = [[0, 2, "2"], [0, 1, "3"], [4, 2, "2"], [1, 3, "5"], [2, 3, "2"],[5, 6, "3"],[3,7,"3"]]
 # sort_arr = [7,2,3,0,4,1,5,6]
 
-# :fullduplex
-# 2
-# 1
+
 # arr_tops = [[0, "2"], [1, "3"], [2, "2"], [3, "5"], [4, "7"]]
 # arr_tops_links = [[0, 2, "2"], [1, 2, "3"], [1, 3, "6"], [2, 4, "2"], [3, 4, "1"]]
 # arr = [0, 2, 3, 4, 5]

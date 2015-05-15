@@ -1,5 +1,5 @@
-function drowGantDiagram(array){
-	var params = "width=800,height=500, resizable=yes,scrollbars=yes"
+function drowGantDiagram(array, jsonstr){
+	var params = "width=420,height=230"
 	var opened = window.open("","",params);
 	opened.document.write("<html><head><link rel='stylesheet' type='text/css' href='gant.css'><link rel='stylesheet' type='text/css' href='joint.css'><title>Diagram</title></head><body style='overflow:auto'><table class='processors'></table><div id='gant_task_container'><table class='routes'></table></div></body></html>");
 	prc_table = opened.document.querySelector(".processors");
@@ -49,4 +49,25 @@ function drowGantDiagram(array){
 			}
 		}
 	}
+
+	// setTimeout(function(){
+	// 	continueExecution(opened, jsonstr);
+	// }, 2000)
 };
+
+function continueExecution(opened, jsonstr){
+	var gantTaskGraph = new joint.dia.Graph;
+
+	var gantTaskPaper = new joint.dia.Paper({
+		    el: opened.document.querySelector("#gant_task_container"),
+		    width: 400,
+		    height: 900,
+		    model: gantTaskGraph,
+		    gridSize: 1
+	});
+
+
+  jsonObjectTask = JSON.parse(jsonstr);
+  gantTaskGraph.fromJSON(jsonObjectTask);
+}
+

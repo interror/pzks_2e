@@ -22,7 +22,9 @@
 	      	<h3 class="navbar-text">Task Graph Manager</h3> 
 
 	      <ul class="nav navbar-nav navbar-right">
-	      	<button id="gant" type="button" class="btn btn-default navbar-btn">Gant</button>
+	      	<input type="radio" checked="checked" name="plan_var" value="var1"> 1-st Alghoritm
+	      	<input type="radio" name="plan_var" value="var2"> 2-nd Alghoritm
+	      	<button id="gant" type="button" class="btn btn-default navbar-btn">Start</button>
 	      	<input type="radio" checked="checked" name="sort" value="sort1"> 1-st sort
 	      	<input type="radio" name="sort" value="sort2"> 2-nd sort
 	      	<input type="radio" name="sort" value="sort3"> 3-rd sort
@@ -58,8 +60,8 @@
 
 	      <ul class="nav navbar-nav navbar-right">
 	      	<input type="checkbox" id="duplex">Duplex on/off</input>
-	      	<input type="number" id="phys_links" name="points" min="0" max="100" step="1" value="2">Physical Links</input>
-	      	<input type="number" id="coefficient" name="coef" min="0" max="100" step="1" value="1">Coefficient</input>
+	      	<input type="number" id="phys_links" name="points" min="0" step="1" value="2" style="width: 50px;">Physical Links</input>
+	      	<input type="number" id="coefficient" name="coef" min="0" step="0.1" value="1" style="width: 50px;">Coefficient</input>
 	      	<button id="test_sys" type="button" class="btn btn-default navbar-btn">Test Graph</button>
 	      	<button id="clear_sys_paper" type="button" class="btn btn-default navbar-btn">Clear</button>
 	      	<button id="save_to_file_sys" type="button" class="btn btn-default navbar-btn">Save</button>

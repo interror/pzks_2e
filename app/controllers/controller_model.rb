@@ -60,12 +60,13 @@ end
 
 class Link
 
-	attr_accessor :from, :to, :weight, :path, :work_counter, :add, :final, :done, :from_name
+	attr_accessor :from, :to, :weight, :path, :work_counter, :add, :final, :done, :from_name, :to_name
 
-	def initialize(from, to, weight, from_name)
+	def initialize(from, to, weight, from_name, to_name)
 		@from = from
 		@from_name = from_name
 		@to = to
+		@to_name = to_name
 		@weight = weight
 		@path = []
 		@work_counter = weight

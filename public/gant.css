@@ -3,6 +3,7 @@
 	width: 20px; 
 	table-layout:fixed;
 	text-align: center;
+	empty-cells: show;
 }
 
 .processors > tbody > tr:first-child > td {
@@ -16,10 +17,43 @@
 	width: 30px; 
 	table-layout:fixed;
 	text-align: center;	
+	empty-cells: show;
 }
 
 .routes > tbody > tr:first-child > td {
     background: black;
     color: white;
     font-size: 16px;
+}
+
+.processors {
+	float: left;
+}
+
+.routes {
+	float: right;
+}
+
+text.topName{
+transform: translate(25px,5px);
+-ms-transform: translate(25px,5px); /* IE 9 */
+-webkit-transform: translate(25px,5px); /* Safari and Chrome */
+-o-transform: translate(25px,5px); /* Opera */
+-moz-transform: translate(25px,5px); /* Firefox */
+}
+text.topValue{
+transform: translate(25px,30px);
+-ms-transform: translate(25px,30px); /* IE 9 */
+-webkit-transform: translate(25px,30px); /* Safari and Chrome */
+-o-transform: translate(25px,30px); /* Opera */
+-moz-transform: translate(25px,30px); /* Firefox */
+}
+
+svg {
+	pointer-events: none;
+	position: relative;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
 }

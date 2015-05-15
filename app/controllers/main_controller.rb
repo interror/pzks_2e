@@ -11,7 +11,7 @@ class MainController < ApplicationController
 	end
 
 	def gant
-		data = params['gant_data']
+		data = params['gant_data']	
 		arrays = []
 		data[4..7].each{|elm| arrays.push(JSON.parse(elm))}
 		arrays.map! do |array|
@@ -53,9 +53,12 @@ class MainController < ApplicationController
 
 		# Create system model
 		systemModel = SystemModel.new(array_of_processors, array_of_connects, coef, phys_links, duplex)
-		systemModel.start(taskGraph)
+		if data[8] == "var1"
+			systemModel.start(taskGraph)
+		elsif data[8] == "var2"
+			systemModel.start2(taskGraph)
+		end
 		out = systemModel.construct_gant_diagram
-		
 		respond_to do |format|
 				format.json {render json: out }
     end
