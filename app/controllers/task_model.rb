@@ -46,7 +46,7 @@ class TaskGraphModel
 	attr_accessor :graph, :order_list
 
 	def initialize(tops_lst,schema,sort_lst)
-		@order_list = sort_lst
+		@order_list = sort_lst.clone
 		@graph = []
 		tops_lst.each{|node| @graph << TopModel.new(node[0],node[1].to_i)}
 		create_links(schema)

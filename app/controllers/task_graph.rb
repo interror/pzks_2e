@@ -21,7 +21,7 @@ end
 
 class TaskGraph
 
-	attr_accessor :sort_res1, :sort_res2, :sort_res3, :levels, :array_res1, :array_res2, :array_res3
+	attr_accessor :sort_res1, :sort_res2, :sort_res3, :levels, :array_res1, :array_res2, :array_res3, :t_critical, :tops_sum
 
 	def initialize(tops_lst,schema)
 		@graph = tops_lst
@@ -32,9 +32,14 @@ class TaskGraph
 		@array_res2 = []
 		@array_res3 = []
 		@levels = []
+		@t_critical = 0
+		@tops_sum = 0
 		run_program(schema)
 	end
 
+	def sums_of_tops
+		return @graph.inject(0){|acc, var| acc + var.weight}
+	end
 
 	def run_program(schema)
 		create_links(schema)
@@ -49,6 +54,7 @@ class TaskGraph
 
 			@graph.pop(@fix_count)
 		end
+		@tops_sum = sums_of_tops
 	end
 
 	def construct_lvls(schema)
@@ -132,6 +138,7 @@ class TaskGraph
 		arrayOfTki.pop(@fix_count)
 
 		globalTki = arrayOfTki.max
+		@t_critical = globalTki
 		globalNki = arrayOfNki.max
 
 		

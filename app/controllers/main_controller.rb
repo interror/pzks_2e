@@ -60,7 +60,7 @@ class MainController < ApplicationController
 		end
 		out = systemModel.construct_gant_diagram
 		respond_to do |format|
-				format.json {render json: out }
+			format.json {render json: out }
     end
 	end
 

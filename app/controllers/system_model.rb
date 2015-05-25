@@ -1,6 +1,7 @@
-require 'task_model.rb'
-require 'controller_model.rb'
-require 'analyze_model.rb'
+require_relative 'task_model.rb'
+require_relative 'controller_model.rb'
+require_relative 'analyze_model.rb'
+#require 'json'
 
 class ProcessorElement
 
@@ -32,7 +33,7 @@ end
 
 class SystemModel
 
-	attr_accessor :model
+	attr_accessor :model, :alghoritm_work_time
 
 	def initialize(tops_lst,schema,coef_of_work_for_all_procs=1,physical_links = 2, connection=:fullduplex)
 		@coeficient = coef_of_work_for_all_procs
@@ -40,6 +41,7 @@ class SystemModel
 		@model = []
 		@physical_links = physical_links
 		@connection_type = connection
+		@alghoritm_work_time = 0.0
 		tops_lst.each { |i| @model << ProcessorElement.new(i, physical_links, connection) }
 		create_links(schema)
 		@model.each{|prc| @history_cache[prc.id] =  [] } # Create processor id in history cache
@@ -55,11 +57,17 @@ class SystemModel
 	end
 
 	def start(task_graph)
+		t1 = Time.now
 		working_model(task_graph)
+		t2 = Time.now
+		@alghoritm_work_time = t2 - t1
 	end
 
 	def start2(task_graph)
+		t1 = Time.now
 		working_model2(task_graph)
+		t2 = Time.now
+		@alghoritm_work_time = t2 - t1
 	end
 
 	def construct_gant_diagram
@@ -79,7 +87,11 @@ class SystemModel
 			transfer_array << val
 		end
 		transfer_array.insert(0, array)
-		return [processors_array, transfer_array]
+		res = [processors_array, transfer_array]
+		# f = File.open("output_diagram.txt", "a") do |file|
+		# 	file.write(res.to_json)
+		# end
+		return res
 	end
 
 private
@@ -444,14 +456,7 @@ private
 		count_task_working_time(task_graph) # Change work weight of task using diving on coeff
 		ready_array = []
 		task_graph.order_list.each{|elm| ready_array << elm if (elm.status_is_ready? && ready_array.length < n) }
-		ready_array.each {|top| print "#{top.top}, " }
-		print "\n"
-
 		sorted_processors_lst = @model.sort{|x,y| y.links.length <=> x.links.length }
-		sorted_processors_lst.each {|prc| print "#{prc.id}, " }
-		print "\n"
-
-
 		for i in 0..ready_array.length-1
 			sorted_processors_lst[i].task = ready_array[i]
 		end
@@ -647,8 +652,8 @@ private
 			end
 			hash_of_takts[prc.id] = analyzer_work(transfer_array)
 		end
-		p "For - #{task.top}"
-		p hash_of_takts
+		# p "For - #{task.top}"
+		# p hash_of_takts
 		res = hash_of_takts.min_by{|kay,value| value}
 		result = @model.find{|prc| prc.id == res[0] }
 		return result
@@ -791,21 +796,21 @@ end
 # sort_arr = [7,2,3,0,4,1,5,6]
 
 
-# arr_tops = [[0, "2"], [1, "3"], [2, "2"], [3, "5"], [4, "7"]]
-# arr_tops_links = [[0, 2, "2"], [1, 2, "3"], [1, 3, "6"], [2, 4, "2"], [3, 4, "1"]]
-# arr = [0, 2, 3, 4, 5]
-# arr_of_links = [[0, 4], [2, 4], [3, 4], [4, 5]]
-# sort_arr = [2, 1, 3, 4, 0]
+arr_tops = [[0, "2"], [1, "3"], [2, "2"], [3, "5"], [4, "7"]]
+arr_tops_links = [[0, 2, "2"], [1, 2, "3"], [1, 3, "6"], [2, 4, "2"], [3, 4, "1"]]
+arr = [0, 2, 3, 4, 5]
+arr_of_links = [[0, 4], [2, 4], [3, 4], [4, 5]]
+sort_arr = [2, 1, 3, 4, 0]
 
 
-# taskGraph = TaskGraphModel.new(arr_tops,arr_tops_links,sort_arr)
-# taskGraph.order_graph
-# #taskGraph.show
+taskGraph = TaskGraphModel.new(arr_tops,arr_tops_links,sort_arr)
+taskGraph.order_graph
+#taskGraph.show
 
-# systemModel = SystemModel.new(arr,arr_of_links,1,2,:fullduplex)
-# #systemModel.show
+systemModel = SystemModel.new(arr,arr_of_links,1,2,:fullduplex)
+#systemModel.show
 
 
-# systemModel.start(taskGraph)
-# #taskGraph.show
-# systemModel.construct_gant_diagram
+systemModel.start2(taskGraph)
+#taskGraph.show
+systemModel.construct_gant_diagram
